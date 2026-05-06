@@ -1,0 +1,33 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id            Int           @id   @default(autoincrement())
+  username      String
+  email         String        @unique
+  password      String
+  projects      Project[]
+}
+
+model Project {
+  id            Int           @id   @default(autoincrement())
+  userId        Int
+  name          String
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  deployments   Deployment[]
+  user          User          @relation(fields: [userId], references: [id])
+}
+
+model Deployment {
+  id            Int           @id    @default(autoincrement())
+  projectId     Int
+  deploymentUrl String
+  project       Project       @relation(fields: [projectId], references: [id])
+}

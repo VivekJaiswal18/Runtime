@@ -1,0 +1,101 @@
+import type { Deployment, Project, UsageMetric } from "./types";
+
+export const mockProjects: Project[] = [
+  {
+    id: "p1",
+    name: "portfolio",
+    domain: "portfolio-demo.runtime.app",
+    repo: "vivek/portfolio",
+    branch: "main",
+    status: "Ready",
+    updatedAt: "2m ago",
+    lastCommit: "Fix avatar loading issue",
+  },
+  {
+    id: "p2",
+    name: "edu-vault-neo",
+    domain: "edu-vault-neo.runtime.app",
+    repo: "vivek/edu-vault",
+    branch: "main",
+    status: "Building",
+    updatedAt: "5m ago",
+    lastCommit: "Update landing page hero",
+  },
+  {
+    id: "p3",
+    name: "cross-guard",
+    domain: "cross-guard.runtime.app",
+    repo: "vivek/cross-guard",
+    branch: "main",
+    status: "Ready",
+    updatedAt: "1h ago",
+    lastCommit: "Improve route protection",
+  },
+  {
+    id: "p4",
+    name: "superdev-app",
+    domain: "superdev-app.runtime.app",
+    repo: "vivek/superdev-app",
+    branch: "main",
+    status: "Failed",
+    updatedAt: "3h ago",
+    lastCommit: "First commit",
+  },
+  {
+    id: "p5",
+    name: "poly-chain",
+    domain: "poly-chain.runtime.app",
+    repo: "vivek/poly-chain",
+    branch: "main",
+    status: "Ready",
+    updatedAt: "1d ago",
+    lastCommit: "Merge branch main",
+  },
+  {
+    id: "p6",
+    name: "einstein-ai",
+    domain: "einstein-ai.runtime.app",
+    repo: "vivek/einstein-ai",
+    branch: "main",
+    status: "Ready",
+    updatedAt: "2d ago",
+    lastCommit: "Initial deployment setup",
+  },
+];
+
+export const mockDeployments: Deployment[] = [
+  {
+    id: "d1",
+    projectName: "edu-vault-neo",
+    branch: "main",
+    commitMessage: "Update page.tsx",
+    author: "Vivek Jaiswal",
+    createdAt: "7m ago",
+    state: "In Progress",
+  },
+  {
+    id: "d2",
+    projectName: "portfolio",
+    branch: "main",
+    commitMessage: "Fix avatar",
+    author: "Vivek Jaiswal",
+    createdAt: "20m ago",
+    state: "Success",
+  },
+  {
+    id: "d3",
+    projectName: "superdev-app",
+    branch: "main",
+    commitMessage: "First commit",
+    author: "Vivek Jaiswal",
+    createdAt: "1h ago",
+    state: "Error",
+  },
+];
+
+export const usageMetrics: UsageMetric[] = [
+  { label: "Edge Requests", value: "2.7K / 1M", percentUsed: 0.3 },
+  { label: "ISR Reads", value: "905 / 1M", percentUsed: 0.09 },
+  { label: "Fast Origin Transfer", value: "5.76 GB / 10 GB", percentUsed: 57.6 },
+  { label: "Fast Data Transfer", value: "54.43 MB / 100 GB", percentUsed: 0.05 },
+];
