@@ -95,7 +95,7 @@ export function ProjectsSection({ query = "" }: { query?: string }) {
             {filtered.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={4} className="py-10 text-center text-sm text-muted-foreground">
-                  No projects matched "{query}".
+                  No projects matched &quot;{query}&quot;.
                 </TableCell>
               </TableRow>
             ) : null}
