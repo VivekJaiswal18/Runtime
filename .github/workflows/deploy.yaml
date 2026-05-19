@@ -7,6 +7,7 @@ on:
 jobs:
   deploy-build-server:
     runs-on: ubuntu-latest
+    environment: production
     needs: []
     steps:
       - uses: actions/checkout@v4
