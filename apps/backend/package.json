@@ -13,6 +13,7 @@
   "license": "ISC",
   "dependencies": {
     "@repo/db": "workspace:*",
+    "@repo/kafka": "workspace:*",
     "@types/bcrypt": "^6.0.0",
     "@types/dotenv": "^8.2.3",
     "@types/express": "^5.0.6",
