@@ -4,7 +4,7 @@ RUN apk add --no-cache git
 
 WORKDIR /home/app
 
-COPY src/index.ts src/index.ts
+COPY src/build-runner.ts src/build-runner.ts
 COPY package*.json .
 COPY tsconfig.json tsconfig.json
 COPY main.sh main.sh

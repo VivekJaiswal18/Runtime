@@ -1,1 +1,1 @@
-{"root":["./src/client.ts","./src/index.ts","./src/producer.ts","./src/setup.ts","./src/topics.ts"],"version":"6.0.3"}
+{"root":["./src/client.ts","./src/consumer.ts","./src/index.ts","./src/producer.ts","./src/setup.ts","./src/topics.ts"],"version":"6.0.3"}

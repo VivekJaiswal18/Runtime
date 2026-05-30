@@ -1,7 +1,8 @@
 import "dotenv/config";
 import express from "express";
 import { prisma } from "@repo/db";
-import {publishBuildJob, BuildJobPayload} from "@repo/kafka";
+import {publishBuildJob} from "@repo/kafka";
+import {v4} from "uuid";
 
 const app = express(); 
 
@@ -31,9 +32,15 @@ app.post("/signup", async (req, res)=>{
 
 app.post("/deploy", async (req, res)=>{
     const {repoUrl, branch, name} = req.body;
-    let jobId = repoUrl + name;
-    let publishbuildjob = publishBuildJob({jobId, repoUrl, branch});
-    res.send(`${name} is deployed`)
-})
+    const jobId = v4();
+    
+    await publishBuildJob({jobId, name, repoUrl, branch});
+    res.send(`${[jobId, repoUrl, name]} is deployed`)
+});
 
+// app.get("/deployments", (req, res)=>{
+
+// })
+
+// app.psot("/metrics", )
 app.listen(8080);

@@ -1,6 +1,5 @@
 import { Kafka } from 'kafkajs';
 
-
 let kafkaInstance: Kafka | null = null;
 
 export default function getKafka(): Kafka {
@@ -19,6 +18,12 @@ if (!KAFKA_BROKERS) throw new Error("No KAFKA_BROKERS present")
   kafkaInstance = new Kafka({
     // clientId: process.env.KAFKA_CLIENT_ID || 'runtime',
     brokers: KAFKA_BROKERS.split(','),
+    connectionTimeout: 30000,
+    requestTimeout: 30000,
+    retry: {
+    initialRetryTime: 300,
+    retries: 10,
+    },
     ...(process.env.KAFKA_SSL === 'true' && {
       ssl: {
         ca:   [Buffer.from(KAFKA_CA_CERT_B64, 'base64').toString()],

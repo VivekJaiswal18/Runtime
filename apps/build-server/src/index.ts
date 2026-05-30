@@ -1,21 +1,12 @@
-import { exec } from "node:child_process"; 
+import {startBuildJobConsumer} from "@repo/kafka";
+import {exec} from "child_process";
 
-// const repoDir = "cd home/app/output";
-// const repoDir = "cwd cd home/app/output && npm install && npm run build";
-
-const repo = "cd /home/app/output pnpm install && npm run build";
-
-const build = exec(repo);
-console.log(9);
-//@ts-ignore
-build.stdout.on('data', (data)=>{
-    console.log(data.toString())
-});
-//@ts-ignore
-build.stdout.on('error', (error)=>{
-    console.log(error.toString())
-})
-//@ts-ignore
-build.stdout.on('close', (close)=>{
-    console.log(`Build complete, ${close}`)
+startBuildJobConsumer(async(jobId, branch, repoUrl)=>{
+    exec(`
+            docker run --rm \
+            -e JOB_ID="${jobId}" \
+            -e BRANCH="${branch}" \
+            -e REPO_URL="${repoUrl}" \
+            build-server
+        `);
 })

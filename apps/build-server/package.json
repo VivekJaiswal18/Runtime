@@ -11,6 +11,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@repo/kafka": "workspace:*",
     "@types/node": "^22.15.3",
     "ioredis": "^5.10.1",
     "typescript": "^6.0.3"
