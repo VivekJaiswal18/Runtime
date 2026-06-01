@@ -14,7 +14,7 @@ case "$GIT_REPOSITORY_LINK" in
 esac
 
 echo "Cloning repository.."
-git clone "$GIT_REPOSITORY_LINK" /home/app/output
+git clone --branch "$BRANCH" "$GIT_REPOSITORY_LINK" /home/app/output
 
-npx tsc || exit 1
-exec node /home/app/dist/index.js
+# npx tsc || exit 1
+exec node /home/app/apps/build-server/dist/build-runner.js

@@ -38,7 +38,7 @@ export const publishBuildJob = async ({jobId, name, repoUrl, branch}: BuildJobPa
   });
 };
 
-export const publishBuildLog = async ({jobId, log, type = 'log'}: BuildLogPayload) => {
+export const publishBuildLog = async ({jobId, log, type = "log"}: BuildLogPayload) => {
   const producer = await getProducer();
 
   await producer.send({
