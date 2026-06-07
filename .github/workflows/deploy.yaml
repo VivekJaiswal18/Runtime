@@ -33,8 +33,8 @@ jobs:
               - 'apps/build-server/**'
 
   deploy-build-server:
-    needs: changes
-    if: needs.changes.outputs.build-server == 'true'
+    # needs: changes
+    # if: needs.changes.outputs.build-server == 'true'
     runs-on: ubuntu-latest
     environment: production
     steps:
@@ -91,8 +91,8 @@ jobs:
             --force-new-deployment
 
   deploy-frontend:
-    needs: changes
-    if: needs.changes.outputs.frontend == 'true'
+    # needs: changes
+    # if: needs.changes.outputs.frontend == 'true'
     runs-on: ubuntu-latest
     environment: production
     steps:
@@ -149,8 +149,8 @@ jobs:
             --force-new-deployment
 
   deploy-backend:
-    needs: changes
-    if: needs.changes.outputs.backend == 'true'
+    # needs: changes
+    # if: needs.changes.outputs.backend == 'true'
     runs-on: ubuntu-latest
     environment: production
     steps:
@@ -207,8 +207,8 @@ jobs:
             --force-new-deployment
   
   deploy-build-runner:
-    needs: changes
-    if: needs.changes.outputs.build-server == 'true'
+    # needs: changes
+    # if: needs.changes.outputs.build-server == 'true'
     runs-on: ubuntu-latest
     environment: production
     steps:
