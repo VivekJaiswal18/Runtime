@@ -170,7 +170,7 @@ jobs:
           ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
           IMAGE_TAG: ${{ github.sha }}
         run: |
-          docker build -t $ECR_REGISTRY/runtime:backend-$IMAGE_TAG apps/backend/Dockerfile .
+          docker build -t $ECR_REGISTRY/runtime:backend-$IMAGE_TAG -f apps/backend/Dockerfile .
           docker push $ECR_REGISTRY/runtime:backend-$IMAGE_TAG
 
       - name: Install jq
