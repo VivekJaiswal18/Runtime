@@ -6,7 +6,7 @@ const ecs = new ECSClient({
 });
 
 startBuildJobConsumer(async(jobId, repoUrl, branch)=>{
-    await ecs.send(
+    const response =     await ecs.send(
         new RunTaskCommand({
             cluster: process.env.CLUSTER,
             taskDefinition: process.env.BUILD_TASK_DEFINITION,
@@ -14,13 +14,14 @@ startBuildJobConsumer(async(jobId, repoUrl, branch)=>{
             networkConfiguration:{
                 awsvpcConfiguration: {
                     subnets: process.env.SUBNET!.split(","),
-                    securityGroups: [process.env.SECURITY_GROUPS!],
+                    securityGroups: process.env.SECURITY_GROUPS!.split(","),
+                    // securityGroups: [process.env.SECURITY_GROUPS!],
                     assignPublicIp: "ENABLED",
                 }
             },
             overrides: {
                 containerOverrides:[{
-                    name: "build-server-task-config-container-1-fargate",
+                    name: "build-runner-task-config-container-1-fargate",
                     environment: [
                         {
                             name: "JOB_ID",
@@ -39,6 +40,11 @@ startBuildJobConsumer(async(jobId, repoUrl, branch)=>{
             },
         })
     )
+    if (response.failures?.length){
+        console.error(response.failures)
+    }
+    else{
+        console.log(response.$metadata)
+    }
 })
-
 

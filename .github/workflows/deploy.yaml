@@ -9,10 +9,34 @@ permissions:
   contents: read
 
 jobs:
+  # validate:
+  #   runs-on: ubuntu-latest
+  #   environment: production
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      frontend: ${{ steps.filter.outputs.frontend }}
+      backend: ${{ steps.filter.outputs.backend }}
+      build-server: ${{ steps.filter.outputs.build-server }}
+    steps:
+      - uses: actions/checkout@v4
+  
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            frontend:
+              - 'apps/web/**'
+            backend:
+              - 'apps/backend/**'
+            build-server:
+              - 'apps/build-server/**'
+
   deploy-build-server:
+    needs: changes
+    if: needs.changes.outputs.build-server == 'true'
     runs-on: ubuntu-latest
     environment: production
-    needs: []
     steps:
       - uses: actions/checkout@v4
 
@@ -30,8 +54,8 @@ jobs:
           ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
           IMAGE_TAG: ${{ github.sha }}
         run: |
-          docker build -t $ECR_REGISTRY/runtime:$IMAGE_TAG apps/build-server
-          docker push $ECR_REGISTRY/runtime:$IMAGE_TAG
+          docker build -t $ECR_REGISTRY/build-server:$IMAGE_TAG -f apps/build-server/build-server.Dockerfile .
+          docker push $ECR_REGISTRY/build-server:$IMAGE_TAG
 
       - name: Install jq
         run: sudo apt-get update && sudo apt-get install -y jq
@@ -44,7 +68,7 @@ jobs:
           SERVICE: ${{ secrets.ECS_SERVICE }}
           TASK_FAMILY: ${{ secrets.ECS_TASK_FAMILY }}
         run: |
-          IMAGE_URI="$ECR_REGISTRY/runtime:$IMAGE_TAG"
+          IMAGE_URI="$ECR_REGISTRY/build-server:$IMAGE_TAG"
 
           TASK_DEF=$(aws ecs describe-task-definition \
             --task-definition "$TASK_FAMILY" \
@@ -66,4 +90,169 @@ jobs:
             --task-definition "$NEW_ARN" \
             --force-new-deployment
 
+  deploy-frontend:
+    needs: changes
+    if: needs.changes.outputs.frontend == 'true'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
 
+      - name: Configure AWS 
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login to ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push frontend image
+        env: 
+          ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build -t $ECR_REGISTRY/frontend:$IMAGE_TAG apps/web
+          docker push $ECR_REGISTRY/frontend:$IMAGE_TAG
+
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+
+      - name: Trigger new ECS deploy
+        env:
+          ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
+          IMAGE_TAG: ${{ github.sha }}
+          CLUSTER: ${{ secrets.ECS_CLUSTER }}
+          SERVICE: ${{ secrets.FRONTEND_ECS_SERVICE }}
+          TASK_FAMILY: ${{ secrets.FRONTEND_ECS_TASK_FAMILY }}
+        run: |
+          IMAGE_URI="$ECR_REGISTRY/frontend:$IMAGE_TAG"
+
+          TASK_DEF=$(aws ecs describe-task-definition \
+            --task-definition "$TASK_FAMILY" \
+            --query 'taskDefinition' \
+            --output json)
+
+          NEW_TASK_DEF=$(echo "$TASK_DEF" | jq \
+            --arg IMAGE "$IMAGE_URI" \
+            '.containerDefinitions[0].image = $IMAGE | del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .compatibilities, .registeredAt, .registeredBy)')
+
+          NEW_ARN=$(aws ecs register-task-definition \
+            --cli-input-json "$NEW_TASK_DEF" \
+            --query 'taskDefinition.taskDefinitionArn' \
+            --output text)
+
+          aws ecs update-service \
+            --cluster "$CLUSTER" \
+            --service "$SERVICE" \
+            --task-definition "$NEW_ARN" \
+            --force-new-deployment
+
+  deploy-backend:
+    needs: changes
+    if: needs.changes.outputs.backend == 'true'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS 
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login to ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push backend image
+        env: 
+          ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build -t $ECR_REGISTRY/backend:$IMAGE_TAG apps/backend
+          docker push $ECR_REGISTRY/backend:$IMAGE_TAG
+
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+
+      - name: Trigger new ECS deploy
+        env:
+          ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
+          IMAGE_TAG: ${{ github.sha }}
+          CLUSTER: ${{ secrets.ECS_CLUSTER }}
+          SERVICE: ${{ secrets.BACKEND_ECS_SERVICE }}
+          TASK_FAMILY: ${{ secrets.BACKEND_ECS_TASK_FAMILY }}
+        run: |
+          IMAGE_URI="$ECR_REGISTRY/backend:$IMAGE_TAG"
+
+          TASK_DEF=$(aws ecs describe-task-definition \
+            --task-definition "$TASK_FAMILY" \
+            --query 'taskDefinition' \
+            --output json)
+
+          NEW_TASK_DEF=$(echo "$TASK_DEF" | jq \
+            --arg IMAGE "$IMAGE_URI" \
+            '.containerDefinitions[0].image = $IMAGE | del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .compatibilities, .registeredAt, .registeredBy)')
+
+          NEW_ARN=$(aws ecs register-task-definition \
+            --cli-input-json "$NEW_TASK_DEF" \
+            --query 'taskDefinition.taskDefinitionArn' \
+            --output text)
+
+          aws ecs update-service \
+            --cluster "$CLUSTER" \
+            --service "$SERVICE" \
+            --task-definition "$NEW_ARN" \
+            --force-new-deployment
+  
+  deploy-build-runner:
+    needs: changes
+    if: needs.changes.outputs.build-server == 'true'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS 
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login to ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push build-runner image
+        env: 
+          ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build -t $ECR_REGISTRY/build-runner:$IMAGE_TAG -f apps/build-server/build-runner.Dockerfile .
+          docker push $ECR_REGISTRY/build-runner:$IMAGE_TAG
+
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+
+      - name: Trigger new ECS deploy
+        env:
+          ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
+          IMAGE_TAG: ${{ github.sha }}
+          CLUSTER: ${{ secrets.ECS_CLUSTER }}
+          TASK_FAMILY: ${{ secrets.BUILD_RUNNER_ECS_TASK_FAMILY }}
+        run: |
+          IMAGE_URI="$ECR_REGISTRY/build-runner:$IMAGE_TAG"
+
+          TASK_DEF=$(aws ecs describe-task-definition \
+            --task-definition "$TASK_FAMILY" \
+            --query 'taskDefinition' \
+            --output json)
+
+          NEW_TASK_DEF=$(echo "$TASK_DEF" | jq \
+            --arg IMAGE "$IMAGE_URI" \
+            '.containerDefinitions[0].image = $IMAGE | del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .compatibilities, .registeredAt, .registeredBy)')
+
+          NEW_ARN=$(aws ecs register-task-definition \
+            --cli-input-json "$NEW_TASK_DEF" \
+            --query 'taskDefinition.taskDefinitionArn' \
+            --output text)

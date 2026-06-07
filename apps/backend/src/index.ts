@@ -5,13 +5,23 @@ import {publishBuildJob, startLogStreamConsumer} from "@repo/kafka";
 import {v4} from "uuid";
 import {compare, hash} from "bcrypt";
 import {generateAccessToken, generateRefreshToken} from "./utils.ts";
-import authenticate from "./middlewares/auth.middleware.ts";
+import {authenticate,  AuthReq} from "./middlewares/auth.middleware.ts";
+import { userInfo } from "os";
+import cors from "cors";
+import cookieParser from "cookie-parser"
+
 
 const app = express(); 
+app.use(cookieParser());
+app.use(cors({
+    origin: "http://localhost:3000",
+    credentials: true
+}))
 
 app.use(express.json());
 
 app.post("/signup", async (req, res)=>{
+    console.log("reached")
     try {
         const {username, email, password} = req.body;
         const hashPassword = await hash(password, 10)
@@ -38,7 +48,7 @@ app.post("/signup", async (req, res)=>{
         }
 });
 //@ts-ignore
-app.post("/login", authenticate, async (req, res)=>{
+app.post("/login", async (req, res)=>{
     try{
     const {email, password} = req.body;
     const user = await prisma.user.findUnique({
@@ -66,7 +76,22 @@ app.post("/login", authenticate, async (req, res)=>{
 });
 //@ts-ignore
 app.post("/logout", authenticate, async(req, res)=>{
-
+    try{
+        const {user} = req as AuthReq;
+        await prisma.user.update({
+       where: {id: user.id},
+       data: {refreshToken: null} 
+    })
+      res.clearCookie("refreshToken", {
+      httpOnly: true,
+      secure: true,
+      sameSite: "strict"
+    });
+    res.status(200).json("User logged out successfully")
+    }
+    catch(error){
+        return res.status(500).json("User not logged out successfully")
+    }
 })
 
 app.post("/deploy", async (req, res)=>{

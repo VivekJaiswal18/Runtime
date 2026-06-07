@@ -2,16 +2,16 @@ import jwt from "jsonwebtoken";
 
 interface userPayload{
     id: number,
-    email: string,
     username: string
+    email: string,
 }
 
 export function generateRefreshToken(user: userPayload){
     return jwt.sign(
         {
+            id: user.id,
             username: user.username,
-            email: user.email,
-            id: user.id
+            email: user.email
         },
         process.env.JWT_REFRESH_SECRET!,
         {
