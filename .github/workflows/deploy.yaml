@@ -68,7 +68,7 @@ jobs:
           SERVICE: ${{ secrets.ECS_SERVICE }}
           TASK_FAMILY: ${{ secrets.ECS_TASK_FAMILY }}
         run: |
-          IMAGE_URI="$ECR_REGISTRY/build-server:$IMAGE_TAG"
+          IMAGE_URI="$ECR_REGISTRY/runtime:build-server-$IMAGE_TAG"
 
           TASK_DEF=$(aws ecs describe-task-definition \
             --task-definition "$TASK_FAMILY" \
@@ -112,7 +112,7 @@ jobs:
           ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
           IMAGE_TAG: ${{ github.sha }}
         run: |
-          docker build -t $ECR_REGISTRY/runtime:frontend-$IMAGE_TAG apps/web
+          docker build -t $ECR_REGISTRY/runtime:frontend-$IMAGE_TAG -f apps/web/Dockerfile .
           docker push $ECR_REGISTRY/runtime:frontend-$IMAGE_TAG
 
       - name: Install jq
@@ -126,7 +126,7 @@ jobs:
           SERVICE: ${{ secrets.FRONTEND_ECS_SERVICE }}
           TASK_FAMILY: ${{ secrets.FRONTEND_ECS_TASK_FAMILY }}
         run: |
-          IMAGE_URI="$ECR_REGISTRY/frontend:$IMAGE_TAG"
+          IMAGE_URI="$ECR_REGISTRY/runtime:frontend-$IMAGE_TAG"
 
           TASK_DEF=$(aws ecs describe-task-definition \
             --task-definition "$TASK_FAMILY" \
@@ -170,7 +170,7 @@ jobs:
           ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
           IMAGE_TAG: ${{ github.sha }}
         run: |
-          docker build -t $ECR_REGISTRY/runtime:backend-$IMAGE_TAG apps/backend
+          docker build -t $ECR_REGISTRY/runtime:backend-$IMAGE_TAG apps/backend/Dockerfile .
           docker push $ECR_REGISTRY/runtime:backend-$IMAGE_TAG
 
       - name: Install jq
@@ -184,7 +184,7 @@ jobs:
           SERVICE: ${{ secrets.BACKEND_ECS_SERVICE }}
           TASK_FAMILY: ${{ secrets.BACKEND_ECS_TASK_FAMILY }}
         run: |
-          IMAGE_URI="$ECR_REGISTRY/backend:$IMAGE_TAG"
+          IMAGE_URI="$ECR_REGISTRY/runtime:backend-$IMAGE_TAG"
 
           TASK_DEF=$(aws ecs describe-task-definition \
             --task-definition "$TASK_FAMILY" \
@@ -241,7 +241,7 @@ jobs:
           CLUSTER: ${{ secrets.ECS_CLUSTER }}
           TASK_FAMILY: ${{ secrets.BUILD_RUNNER_ECS_TASK_FAMILY }}
         run: |
-          IMAGE_URI="$ECR_REGISTRY/build-runner:$IMAGE_TAG"
+          IMAGE_URI="$ECR_REGISTRY/runtime:build-runner-$IMAGE_TAG"
 
           TASK_DEF=$(aws ecs describe-task-definition \
             --task-definition "$TASK_FAMILY" \
