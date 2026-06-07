@@ -54,8 +54,8 @@ jobs:
           ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
           IMAGE_TAG: ${{ github.sha }}
         run: |
-          docker build -t $ECR_REGISTRY/build-server:$IMAGE_TAG -f apps/build-server/build-server.Dockerfile .
-          docker push $ECR_REGISTRY/build-server:$IMAGE_TAG
+          docker build -t $ECR_REGISTRY/runtime:build-server-$IMAGE_TAG -f apps/build-server/build-server.Dockerfile .
+          docker push $ECR_REGISTRY/runtime:build-server-$IMAGE_TAG
 
       - name: Install jq
         run: sudo apt-get update && sudo apt-get install -y jq
@@ -112,8 +112,8 @@ jobs:
           ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
           IMAGE_TAG: ${{ github.sha }}
         run: |
-          docker build -t $ECR_REGISTRY/frontend:$IMAGE_TAG apps/web
-          docker push $ECR_REGISTRY/frontend:$IMAGE_TAG
+          docker build -t $ECR_REGISTRY/runtime:frontend-$IMAGE_TAG apps/web
+          docker push $ECR_REGISTRY/runtime:frontend-$IMAGE_TAG
 
       - name: Install jq
         run: sudo apt-get update && sudo apt-get install -y jq
@@ -170,8 +170,8 @@ jobs:
           ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
           IMAGE_TAG: ${{ github.sha }}
         run: |
-          docker build -t $ECR_REGISTRY/backend:$IMAGE_TAG apps/backend
-          docker push $ECR_REGISTRY/backend:$IMAGE_TAG
+          docker build -t $ECR_REGISTRY/runtime:backend-$IMAGE_TAG apps/backend
+          docker push $ECR_REGISTRY/runtime:backend-$IMAGE_TAG
 
       - name: Install jq
         run: sudo apt-get update && sudo apt-get install -y jq
@@ -228,8 +228,8 @@ jobs:
           ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
           IMAGE_TAG: ${{ github.sha }}
         run: |
-          docker build -t $ECR_REGISTRY/build-runner:$IMAGE_TAG -f apps/build-server/build-runner.Dockerfile .
-          docker push $ECR_REGISTRY/build-runner:$IMAGE_TAG
+          docker build -t $ECR_REGISTRY/runtime:build-runner-$IMAGE_TAG -f apps/build-server/build-runner.Dockerfile .
+          docker push $ECR_REGISTRY/runtime:build-runner-$IMAGE_TAG
 
       - name: Install jq
         run: sudo apt-get update && sudo apt-get install -y jq
