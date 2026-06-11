@@ -24,7 +24,7 @@ export default function Deploy(){
 
     const handleSubmit = async (e: React.FormEvent) =>{
         e.preventDefault()
-        const response = await fetch("http://runtime-backend-lb-396229780.ap-southeast-2.elb.amazonaws.com/delpoy", {
+        const response = await fetch("http://runtime-backend-lb-396229780.ap-southeast-2.elb.amazonaws.com/deploy", {
             method: "POST",
             headers: {
                 "Content-type": "application/json"
