@@ -1,14 +1,17 @@
 import "dotenv/config";
 import express from "express";
 import { prisma } from "@repo/db";
-import {publishBuildJob, startLogStreamConsumer} from "@repo/kafka";
+import {publishBuildJob, startAiConsumer, startDBLogConsumer, startLogStreamConsumer} from "@repo/kafka";
 import {v4} from "uuid";
 import {compare, hash} from "bcrypt";
-import {generateAccessToken, generateRefreshToken} from "./utils.ts";
+import {generateAccessToken, generateRefreshToken, chunkBuildLogs, generateSummary, indexDeploymentLogsSummary} from "./utils.ts";
 import {authenticate,  AuthReq} from "./middlewares/auth.middleware.ts";
 import { userInfo } from "os";
 import cors from "cors";
 import cookieParser from "cookie-parser"
+import test from "./deploy/deploy.ts";
+import {indexDeploymentLogs}  from "./utils.ts"
+import { FormatJsonObjectConfig$outboundSchema } from "@openrouter/sdk/models";
 
 
 const app = express(); 
@@ -19,6 +22,30 @@ app.use(cors({
 }))
 
 app.use(express.json());
+
+// startLogStreamConsumer(async (jobId, log)=>{
+
+// })
+
+startAiConsumer(async (jobId, logs)=>{
+    const logText = Array.isArray(logs) ? logs.join("\n") : logs;
+    const deployment = await prisma.deployment.update({
+        where: {id: Number(jobId)},
+        data: {logs: logText}
+    })
+    const response = await indexDeploymentLogs(jobId, logs,)
+    
+    const summary = await generateSummary(logs)
+    await indexDeploymentLogsSummary(jobId, summary)
+    await prisma.deployment.update({
+        where: {id: Number(jobId)},
+        data: {summary: summary}
+    })
+})
+
+// startDBLogConsumer(async (jobId, logs)=>{
+    
+//     })
 
 app.post("/signup", async (req, res)=>{
     console.log("reached")
@@ -93,23 +120,53 @@ app.post("/logout", authenticate, async(req, res)=>{
         return res.status(500).json("User not logged out successfully")
     }
 })
-
-app.post("/deploy", async (req, res)=>{
+//@ts-ignore
+app.post("/deploy", authenticate, async (req, res)=>{
+    const {user} = req as AuthReq;
     const {repoUrl, branch, name} = req.body;
-    const jobId = v4();
-    let logs: string[] = []
-    await publishBuildJob({jobId, name, repoUrl, branch});
-    await startLogStreamConsumer(async (jobId, log)=>{
-        // let logs: string[] = [];
-        logs.push(log)
-        console.log(logs);
+    try{
+    const job = await prisma.project.create({
+        //@ts-ignore
+        data:  {
+            userId: user.id,
+            repoUrl: repoUrl,
+            name: name
+        }
+    })    
+
+    const deployment = await prisma.deployment.create({
+        data: {
+            projectId: job.id,
+            deploymentUrl: "",
+            status: "queued",
+            logs: "",
+            summary: "",
+            //@ts-ignore
+            commitHash: "",
+            branch: branch
+        }
     })
-    res.send(`${[jobId, repoUrl, name, logs]} is deployed`)
+    await publishBuildJob({
+        jobId: String(deployment.id), 
+        name: name, 
+        repoUrl: repoUrl,
+        branch
+    });
+
+    res.status(200).send(`${name} is queued for deployment!`)
+    }
+    catch(error){
+        res.status(501).json(`Error queuing your project ${name} with error - ${error}`)
+    }
 });
 
-// app.get("/deployments", (req, res)=>{
-
-// })
+app.post("/deployments", async (req, res)=>{
+    const response = await test("this is for testing")
+    // console.log(JSON.stringify(response, null, 2));
+    res.json(response)
+    //@ts-ignore
+    // console.log(response.data[0].embedding.length)
+})
 
 // app.psot("/metrics", )
 app.listen(8080);

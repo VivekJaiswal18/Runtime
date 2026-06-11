@@ -12,6 +12,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@openrouter/sdk": "^0.12.79",
+    "@qdrant/js-client-rest": "^1.18.0",
     "@repo/db": "workspace:*",
     "@repo/kafka": "workspace:*",
     "@types/bcrypt": "^6.0.0",

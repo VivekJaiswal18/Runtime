@@ -12,6 +12,8 @@ model User {
   email         String        @unique
   password      String
   refreshToken  String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
   projects      Project[]
 }
 
@@ -34,6 +36,7 @@ model Deployment {
   logs          String
   summary       String
   createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
   commitHash    String
   branch        String        
   project       Project       @relation(fields: [projectId], references: [id])

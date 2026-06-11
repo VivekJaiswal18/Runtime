@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
 import { SidebarTrigger } from "@/components/ui/sidebar"
+import {signIn} from "next-auth/react"
 
 type SiteHeaderProps = {
   query?: string
@@ -15,6 +16,10 @@ type SiteHeaderProps = {
 export function SiteHeader({ query = "", onQueryChange }: SiteHeaderProps) {
   const { resolvedTheme, setTheme } = useTheme()
   const isDark = resolvedTheme === "dark"
+
+  // const handleClick = () =>{
+  //   window.location.href = '/api/auth/github';
+  // }
 
   return (
     <header className="flex min-h-(--header-height) shrink-0 items-center border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height)">
@@ -45,7 +50,7 @@ export function SiteHeader({ query = "", onQueryChange }: SiteHeaderProps) {
             {isDark ? <SunIcon className="size-4" /> : <MoonIcon className="size-4" />}
             {isDark ? "Light" : "Dark"}
           </Button>
-          <Button variant="outline" size="sm" className="h-9 gap-2">
+          <Button onClick={()=> signIn("github")} variant="outline" size="sm" className="h-9 gap-2">
             <svg
               className="size-4 shrink-0"
               viewBox="0 0 24 24"

@@ -15,6 +15,7 @@ const getConsumer = async (groupId: string): Promise<Consumer> => {
     
 }
 
+// export const startLogStreamConsumer =  async (onMessage: (jobId: number, log: string)=> void) => {
 export const startLogStreamConsumer =  async (onMessage: (jobId: string, log: string)=> void) => {
     const consumer = await getConsumer("frontend-log-consumer");
     await consumer.subscribe({topic: TOPICS.BUILD_LOG, fromBeginning: false});
@@ -26,6 +27,7 @@ export const startLogStreamConsumer =  async (onMessage: (jobId: string, log: st
     });
 };
 
+// export const startBuildJobConsumer = async (onJob: (jobId: number, repoUrl: string, branch: string)=> void)=>{
 export const startBuildJobConsumer = async (onJob: (jobId: string, repoUrl: string, branch: string)=> void)=>{
     const consumer = await getConsumer("build-job-consumer");
     await consumer.subscribe({topic: TOPICS.BUILD_JOB, fromBeginning: false});
@@ -38,6 +40,7 @@ export const startBuildJobConsumer = async (onJob: (jobId: string, repoUrl: stri
 }
 
 export const startAiConsumer = async (onBuildComplete: (jobId: string, logs: string[])=> void) =>{
+// export const startAiConsumer = async (onBuildComplete: (jobId: number, logs: string[])=> void) =>{
   const consumer = await getConsumer("ai-consumer")
   await consumer.subscribe({topic: TOPICS.BUILD_LOG, fromBeginning: false})
   const logsBuffer = new Map<string, string[]>();
