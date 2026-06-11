@@ -4,7 +4,7 @@ export default function Logout(){
 const handleSubmit = async (e: React.FormEvent) =>{
     e.preventDefault()
     try{
-        const response = await fetch("http://localhost:8080/logout", {
+        const response = await fetch("http://runtime-backend-lb-396229780.ap-southeast-2.elb.amazonaws.com/logout", {
         method: "POST",
         credentials: "include",
         headers: {

@@ -32,7 +32,7 @@ const handleSubmit = async (e: React.FormEvent) =>{
   e.preventDefault()
 
   try{
-    const response = await fetch("http://localhost:8080/login", {
+    const response = await fetch("http://runtime-backend-lb-396229780.ap-southeast-2.elb.amazonaws.com/login", {
       method: "POST",
       credentials: "include",
       headers:{

@@ -17,7 +17,7 @@ import { FormatJsonObjectConfig$outboundSchema } from "@openrouter/sdk/models";
 const app = express(); 
 app.use(cookieParser());
 app.use(cors({
-    origin: "http://localhost:3000",
+    origin: "http://runtime-frontend-lb-305484414.ap-southeast-2.elb.amazonaws.com",
     credentials: true
 }))
 
