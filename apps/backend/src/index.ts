@@ -48,7 +48,6 @@ startAiConsumer(async (jobId, logs)=>{
 //     })
 
 app.post("/signup", async (req, res)=>{
-    console.log("reached")
     try {
         const {username, email, password} = req.body;
         const hashPassword = await hash(password, 10)
@@ -74,7 +73,6 @@ app.post("/signup", async (req, res)=>{
             res.status(500).json("User Signup not done")
         }
 });
-//@ts-ignore
 app.post("/login", async (req, res)=>{
     try{
     const {email, password} = req.body;
@@ -101,7 +99,7 @@ app.post("/login", async (req, res)=>{
         res.status(500).json(`Error ${error}`)
     }
 });
-//@ts-ignore
+
 app.post("/logout", authenticate, async(req, res)=>{
     try{
         const {user} = req as AuthReq;
@@ -120,13 +118,13 @@ app.post("/logout", authenticate, async(req, res)=>{
         return res.status(500).json("User not logged out successfully")
     }
 })
-//@ts-ignore
+
 app.post("/deploy", authenticate, async (req, res)=>{
     const {user} = req as AuthReq;
     const {repoUrl, branch, name} = req.body;
     try{
     const job = await prisma.project.create({
-        //@ts-ignore
+        
         data:  {
             userId: user.id,
             repoUrl: repoUrl,
