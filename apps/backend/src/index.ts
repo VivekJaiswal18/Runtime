@@ -65,7 +65,7 @@ app.post("/signup", async (req, res)=>{
             where: {id: user.id},
             data: {refreshToken: refreshToken}
         })
-        res.cookie("refreshToken", refreshToken, {httpOnly: true, secure: true, sameSite: "strict", maxAge: 10 * 24 * 60 * 60 * 1000})
+        res.cookie("refreshToken", refreshToken, {httpOnly: true, secure: true, sameSite: "none", maxAge: 10 * 24 * 60 * 60 * 1000})
         res.status(200).json({accessToken})
         }
         catch(error){
@@ -92,7 +92,7 @@ app.post("/login", async (req, res)=>{
 
     const accessToken = generateAccessToken(user)
     const refreshToken = generateRefreshToken(user)
-    res.cookie("refreshToken", refreshToken, {httpOnly: true, secure: true, sameSite: "strict", maxAge: 10 * 24 * 60 * 60 * 1000})
+    res.cookie("refreshToken", refreshToken, {httpOnly: true, secure: true, sameSite: "none", maxAge: 10 * 24 * 60 * 60 * 1000})
     res.status(200).json({accessToken})
     }
     catch(error){
@@ -110,7 +110,7 @@ app.post("/logout", authenticate, async(req, res)=>{
       res.clearCookie("refreshToken", {
       httpOnly: true,
       secure: true,
-      sameSite: "strict"
+      sameSite: "none"
     });
     res.status(200).json("User logged out successfully")
     }

@@ -10,8 +10,8 @@ import {useState} from "react"
 export default function Deploy(){
 
     const [formData, setformData] = useState({
-        repoUrl: "",
         name: "",
+        repoUrl: "",
         branch: ""
     })
 
