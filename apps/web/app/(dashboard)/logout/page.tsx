@@ -3,17 +3,23 @@
 export default function Logout(){
 const handleSubmit = async (e: React.FormEvent) =>{
     e.preventDefault()
+    const accessToken = localStorage.getItem("accessToken")
+        if (!accessToken) {
+        alert("Missing access token — please login first")
+        return
+        }
     try{
         const response = await fetch("http://runtime-backend-lb-396229780.ap-southeast-2.elb.amazonaws.com/logout", {
         method: "POST",
         credentials: "include",
         headers: {
             "Content-Type": "application/json",
-            "credentails": "include"
-        }
+            "Authorization": `Bearer ${accessToken}`
+        },
     })
     const data = await response.json()
     if(response.ok){
+        localStorage.removeItem("accessToken")
         alert(data)
         console.log("user logged out", data)
     }

@@ -24,10 +24,16 @@ export default function Deploy(){
 
     const handleSubmit = async (e: React.FormEvent) =>{
         e.preventDefault()
+        const accessToken = localStorage.getItem("accessToken")
+        if (!accessToken) {
+          alert("Missing access token — please login first")
+          return
+        }
         const response = await fetch("http://runtime-backend-lb-396229780.ap-southeast-2.elb.amazonaws.com/deploy", {
             method: "POST",
             headers: {
-                "Content-type": "application/json"
+                "Content-type": "application/json",
+                "Authorization": `Bearer ${accessToken}`
             },
             credentials: "include",
             body: JSON.stringify(formData)

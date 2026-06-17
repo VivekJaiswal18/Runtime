@@ -59,8 +59,8 @@ app.post("/signup", async (req, res)=>{
                 password:hashPassword
             }
         });
-        const refreshToken = generateRefreshToken(user)
-        const accessToken = generateAccessToken(user)
+        const refreshToken = await generateRefreshToken(user)
+        const accessToken = await generateAccessToken(user)
         await prisma.user.update({
             where: {id: user.id},
             data: {refreshToken: refreshToken}
@@ -90,8 +90,8 @@ app.post("/login", async (req, res)=>{
         return res.status(401).json("Password incorrect")
     }
 
-    const accessToken = generateAccessToken(user)
-    const refreshToken = generateRefreshToken(user)
+    const accessToken = await generateAccessToken(user)
+    const refreshToken = await generateRefreshToken(user)
     res.cookie("refreshToken", refreshToken, {httpOnly: true, secure: false, sameSite: "lax", maxAge: 10 * 24 * 60 * 60 * 1000})
     res.status(200).json({accessToken})
     }

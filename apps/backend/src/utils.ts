@@ -31,6 +31,7 @@ export function generateRefreshToken(user: userPayload){
 export async function generateAccessToken(user: userPayload){
     return jwt.sign(
         {
+            id: user.id,
             username: user.username,
             email: user.email,
         },

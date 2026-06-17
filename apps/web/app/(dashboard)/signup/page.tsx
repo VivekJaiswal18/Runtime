@@ -15,20 +15,20 @@ import Link from "next/link"
 import React, {useState} from "react";
 
 export default function SignupCard() {
-
+  
   const [formData, setFormData] = useState({
     "username": "",
     "email":"",
     "password":""
   });
-
+  
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>)=>{
     setFormData({
       ...formData,
       [e.target.name]: e.target.value
     })
   };
-
+  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
       try{
@@ -44,6 +44,7 @@ export default function SignupCard() {
         const data = await response.json()
 
         if(response.ok){
+          localStorage.setItem("accessToken", data.accessToken)
           alert("User signed Up successfully")
           console.log("User signed Up successfully", data)
         }

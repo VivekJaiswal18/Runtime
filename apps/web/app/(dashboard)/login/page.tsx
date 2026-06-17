@@ -11,10 +11,12 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import {useRouter} from "next/navigation"
 import Link from "next/link"
 import React, {useState} from "react"
 
 export default function LoginCard() {
+  const router = useRouter()
 
   const [formData, setformData] = useState({
     "email": "",
@@ -30,7 +32,6 @@ export default function LoginCard() {
 
 const handleSubmit = async (e: React.FormEvent) =>{
   e.preventDefault()
-
   try{
     const response = await fetch("http://runtime-backend-lb-396229780.ap-southeast-2.elb.amazonaws.com/login", {
       method: "POST",
@@ -45,6 +46,8 @@ const handleSubmit = async (e: React.FormEvent) =>{
     if(response.ok){
       alert("User logged in successfully")
       console.log("user logged in", data)
+      localStorage.setItem("accessToken", data.accessToken)
+      router.push("/deploy")
     }
     else{
       alert("Error Logging user in")
