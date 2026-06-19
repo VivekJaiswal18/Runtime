@@ -9,7 +9,7 @@ const repo = "cd /home/app/output && npm install && npm run build";
 
 const build = exec(repo);
 
-
+console.log("sandbox running")
 build.stdout?.on('data', async (data)=>{
     await publishBuildLog({
         jobId: jobId,

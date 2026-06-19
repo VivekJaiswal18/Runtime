@@ -2,6 +2,7 @@ import jwt from "jsonwebtoken";
 import {QdrantClient} from "@qdrant/js-client-rest";
 import embedding from "./deploy/deploy.ts"
 import { OpenRouter } from "@openrouter/sdk";
+import { v4 } from "uuid";
 
 interface userPayload{
     id: number,
@@ -46,8 +47,8 @@ export async function generateAccessToken(user: userPayload){
 
 
 type ChunkOptions = {
-    maxChars?: number;   // ~1500–2000 chars is a safe starting point
-    overlapLines?: number; // 2–3 lines overlap so errors aren't split awkwardly
+    maxChars?: number;   
+    overlapLines?: number; 
   };
   
   export function chunkBuildLogs(
@@ -57,9 +58,8 @@ type ChunkOptions = {
     const maxChars = options.maxChars ?? 1500;
     const overlapLines = options.overlapLines ?? 2;
   
-    // 1. Flatten Kafka fragments into lines
     const lines = logLines
-      .join("")
+      .join("\n")
       .split("\n")
       .map((line) => line.trimEnd())
       .filter((line) => line.length > 0)
@@ -72,9 +72,8 @@ type ChunkOptions = {
     let currentLen = 0;
   
     for (const line of lines) {
-      const lineLen = line.length + 1; // + newline
+      const lineLen = line.length + 1;
   
-      // Single long line (e.g. minified output) — hard split
       if (lineLen > maxChars) {
         if (current.length > 0) {
           chunks.push(current.join("\n"));
@@ -90,7 +89,6 @@ type ChunkOptions = {
       if (currentLen + lineLen > maxChars && current.length > 0) {
         chunks.push(current.join("\n"));
   
-        // overlap last N lines into next chunk for context
         current = current.slice(-overlapLines);
         currentLen = current.reduce((sum, l) => sum + l.length + 1, 0);
       }
@@ -107,31 +105,32 @@ type ChunkOptions = {
   }
   
   function isNoiseLine(line: string): boolean {
-    // optional: skip spinner/progress noise
     return (
-      line.startsWith("npm warn") === false && false || // keep warnings for now
+      // line.startsWith("npm warn") === false && false || 
       /^\s*$/.test(line) ||
-      line.includes("\r") // carriage returns from progress bars
+      line.includes("\r") 
     );
   }
-
+      
   export async function indexDeploymentLogs(
     // deployment_id: string,
     jobId: string,
     logs: string[]
   ){
-
+    
     const chunks = chunkBuildLogs(logs)
     for (let i= 0; i < chunks.length; i++){
-        const text = chunks[i];
-        const response = await embedding(text!)
-        //@ts-ignore
-        const vector = response.data[0].embedding; 
-
-        await client.upsert("deployment_logs", {
+      const text = chunks[i];
+      const response = await embedding(text!)
+      console.log("utils", response)
+      //@ts-ignore
+      const vector = response.data[0].embedding; 
+      console.log("utils vector", vector)
+      try{
+        const res = await client.upsert("deploymen_logs", {
             points: [
                 {
-                    id: `${jobId} -${i}`,
+                    id: v4(),
                     vector,
                     payload: {
                         jobId, 
@@ -143,6 +142,11 @@ type ChunkOptions = {
                 }
             ]
         })
+        console.log("util res", res)
+      }
+      catch(error){
+        console.log("util error", error)
+      }
 
     }
   }
@@ -153,17 +157,18 @@ type ChunkOptions = {
     logSummary: string
   ){
 
-    if (!logSummary.trim()) return;
+    if (!logSummary.trim) return;
 
         const response = await embedding(logSummary)
         // @ts-ignore
         const vector = response.data[0].embedding; 
 
-        await client.upsert("deployment_summary", {
+        await client.upsert("deployment-summary", {
             points: [
                 {
                     // id: `${deployment_id}`,
-                    id: `${jobId}`,
+                    // id: `${jobId}`,
+                    id: v4(),
                     vector,
                     payload: {
                         // deployment_id, 
@@ -174,6 +179,8 @@ type ChunkOptions = {
                 }
             ]
         })
+
+        // console.log("from utils", point)
 
     }
 

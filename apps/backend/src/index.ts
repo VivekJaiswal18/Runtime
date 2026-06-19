@@ -24,23 +24,29 @@ app.use(cors({
 app.use(express.json());
 
 // startLogStreamConsumer(async (jobId, log)=>{
-
+    
 // })
 
 startAiConsumer(async (jobId, logs)=>{
-    const logText = Array.isArray(logs) ? logs.join("\n") : logs;
-    const deployment = await prisma.deployment.update({
+    try{
+        console.log(`jobId ${jobId}, logs ${logs} reached backend`)
+        const logText = Array.isArray(logs) ? logs.join("\n") : logs;
+        const deployment = await prisma.deployment.update({
         where: {id: Number(jobId)},
         data: {logs: logText}
     })
-    const response = await indexDeploymentLogs(jobId, logs,)
-    
+    const response = await indexDeploymentLogs(jobId, logs)
     const summary = await generateSummary(logs)
+    console.log("summary from backend", summary)
     await indexDeploymentLogsSummary(jobId, summary)
     await prisma.deployment.update({
         where: {id: Number(jobId)},
         data: {summary: summary}
     })
+}
+catch(error){
+    console.log("Error in aiConsumer", error)
+    }
 })
 
 // startDBLogConsumer(async (jobId, logs)=>{
@@ -67,36 +73,36 @@ app.post("/signup", async (req, res)=>{
         })
         res.cookie("refreshToken", refreshToken, {httpOnly: true, secure: false, sameSite: "lax", maxAge: 10 * 24 * 60 * 60 * 1000})
         res.status(200).json({accessToken})
-        }
-        catch(error){
+    }
+    catch(error){
             console.log(error);
             res.status(500).json("User Signup not done")
         }
-});
-app.post("/login", async (req, res)=>{
-    try{
-    const {email, password} = req.body;
-    const user = await prisma.user.findUnique({
-        where: {
-            email: email
-        }
-    })
-    if (!user){
-        return res.status(401).json("User not found")
+    });
+    app.post("/login", async (req, res)=>{
+        try{
+            const {email, password} = req.body;
+            const user = await prisma.user.findUnique({
+                where: {
+                    email: email
+                }
+            })
+            if (!user){
+                return res.status(401).json("User not found")
     }
-
+    
     const isPasswordValid = await compare(password, user.password)
     if (!isPasswordValid){
         return res.status(401).json("Password incorrect")
     }
-
+    
     const accessToken = await generateAccessToken(user)
     const refreshToken = await generateRefreshToken(user)
     res.cookie("refreshToken", refreshToken, {httpOnly: true, secure: false, sameSite: "lax", maxAge: 10 * 24 * 60 * 60 * 1000})
     res.status(200).json({accessToken})
-    }
-    catch(error){
-        res.status(500).json(`Error ${error}`)
+}
+catch(error){
+    res.status(500).json(`Error ${error}`)
     }
 });
 
@@ -104,15 +110,15 @@ app.post("/logout", authenticate, async(req, res)=>{
     try{
         const {user} = req as AuthReq;
         await prisma.user.update({
-       where: {id: user.id},
-       data: {refreshToken: null} 
-    })
-      res.clearCookie("refreshToken", {
-      httpOnly: true,
-      secure: false,
-      sameSite: "lax"
-    });
-    res.status(200).json("User logged out successfully")
+            where: {id: user.id},
+            data: {refreshToken: null} 
+        })
+        res.clearCookie("refreshToken", {
+            httpOnly: true,
+            secure: false,
+            sameSite: "lax"
+        });
+        res.status(200).json("User logged out successfully")
     }
     catch(error){
         return res.status(500).json("User not logged out successfully")
@@ -123,9 +129,9 @@ app.post("/deploy", authenticate, async (req, res)=>{
     const {user} = req as AuthReq;
     const {repoUrl, branch, name} = req.body;
     try{
-    const job = await prisma.project.create({
-        
-        data:  {
+        const job = await prisma.project.create({
+            
+            data:  {
             userId: user.id,
             repoUrl: repoUrl,
             name: name
@@ -150,11 +156,11 @@ app.post("/deploy", authenticate, async (req, res)=>{
         repoUrl: repoUrl,
         branch
     });
-
+    
     res.status(200).send(`${name} is queued for deployment!`)
-    }
-    catch(error){
-        res.status(501).json(`Error queuing your project ${name} with error - ${error}`)
+}
+catch(error){
+    res.status(501).json(`Error queuing your project ${name} with error - ${error}`)
     }
 });
 
@@ -166,5 +172,21 @@ app.post("/deployments", async (req, res)=>{
     // console.log(response.data[0].embedding.length)
 })
 
-// app.psot("/metrics", )
+app.post("/test", async(req, res)=>{
+    const {jobId, logs} = req.body
+    try{
+    console.log("175")
+    const response = await indexDeploymentLogs(jobId, logs)
+    console.log("174")
+    console.log(response)
+    const summary = await generateSummary(logs)
+    console.log("summary from generateSummary", summary)
+    const summaryvector = await indexDeploymentLogsSummary(jobId, summary)
+    console.log("summaryvector", summaryvector)
+    res.status(200).json(`Response ${response} and Summary ${summary} and summaryvector ${summaryvector}`)
+}
+catch(error){
+    res.status(401).json(`Error from route ${error}`)
+}
+})
 app.listen(8080);
