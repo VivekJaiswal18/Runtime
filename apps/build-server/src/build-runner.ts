@@ -26,22 +26,55 @@ build.stderr?.on('data', async (data)=>{
     })
 })
 
-build.on('close', async (code)=>{
-    if (code !== 0){
-    await publishBuildLog({
-        jobId: jobId,
-        log: `Error during build with exit code: ${code}`,
-        type: "error"
-    })
-    process.exit(1)
+// build.on('close', async (code)=>{
+//     if (code !== 0){
+//     await publishBuildLog({
+//         jobId: jobId,
+//         log: `Error during build with exit code: ${code}`,
+//         type: "error"
+//     })
+//     process.exit(1)
+//     }
+//     await publishBuildLog({
+//         jobId: jobId,
+//         log: "Build Complete",
+//         type: "done"
+//     })
+//     process.exit(0)
+// })
+
+build.on('close', async(code)=>{
+
+    try{
+
+        if(code !== 0){
+
+            await publishBuildLog({
+                jobId,
+                log:`Error during build with exit code: ${code}`,
+                type:"error"
+            });
+
+            return;
+        }
+
+
+        await publishBuildLog({
+            jobId,
+            log:"Build Complete",
+            type:"done"
+        });
+
+
+    }finally{
+
+        setTimeout(()=>{
+            process.exit(code ?? 0)
+        },1000)
+
     }
-    await publishBuildLog({
-        jobId: jobId,
-        log: "Build Complete",
-        type: "done"
-    })
-    process.exit(0)
-})
+
+});
 
 build.on("error", async(error) =>{
     await publishBuildLog({
