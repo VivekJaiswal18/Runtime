@@ -7,23 +7,39 @@ const jobId = process.env.JOB_ID!;
 
 const repo = "cd /home/app/output && npm install && npm run build";
 
+
+await publishBuildLog({
+    jobId: jobId,
+    log: "Build Started",
+    type: "log"
+})
 const build = exec(repo);
 
 console.log("sandbox running")
 build.stdout?.on('data', async (data)=>{
+    try{
     await publishBuildLog({
         jobId: jobId,
         log: data.toString(),
         type: "log"
     })
+    }
+    catch(error){
+        console.log("Kafka log publish failed", error)
+    }
 });
 
 build.stderr?.on('data', async (data)=>{
+    try{
     await publishBuildLog({
         jobId: jobId,
         log: data.toString(),
         type: "log"
     })
+    }
+    catch(error){
+        console.log("Kafka log publish failed", error)
+    }
 })
 
 // build.on('close', async (code)=>{
