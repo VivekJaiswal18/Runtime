@@ -1,11 +1,18 @@
 import {startBuildJobConsumer} from "@repo/kafka";
 import {ECSClient, LaunchType, RunTaskCommand} from "@aws-sdk/client-ecs";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 
 const ecs = new ECSClient({
-    region: process.env.REGION!,
+    region: process.env.REGION!
 });
 
+const s3Client = new S3Client({
+region: process.env.S3_REGION!
+})
+
 startBuildJobConsumer(async(jobId, repoUrl, branch)=>{
+    const presignedUrl = await getPresignedUrl(jobId)
     const response =     await ecs.send(
         new RunTaskCommand({
             cluster: process.env.CLUSTER,
@@ -35,6 +42,10 @@ startBuildJobConsumer(async(jobId, repoUrl, branch)=>{
                             name: "BRANCH",
                             value: branch
                         },
+                        {
+                            name: "PRESIGNED_URL",
+                            value: presignedUrl
+                        }
                     ],
                 }],
             },
@@ -48,3 +59,21 @@ startBuildJobConsumer(async(jobId, repoUrl, branch)=>{
     }
 })
 
+async function getPresignedUrl(jobId: string){
+    const command = new PutObjectCommand({
+        Bucket: process.env.BUCKET,
+        Key: `${jobId}/dist.zip`,
+        ContentType: 'application/zip'
+    })
+
+    const url = await getSignedUrl(
+        s3Client,
+        command,
+        {
+            expiresIn: 600
+        }
+    );
+
+    return url
+
+}

@@ -6,12 +6,10 @@ import {v4} from "uuid";
 import {compare, hash} from "bcrypt";
 import {generateAccessToken, generateRefreshToken, chunkBuildLogs, generateSummary, indexDeploymentLogsSummary} from "./utils.ts";
 import {authenticate,  AuthReq} from "./middlewares/auth.middleware.ts";
-import { userInfo } from "os";
 import cors from "cors";
 import cookieParser from "cookie-parser"
 import test from "./deploy/deploy.ts";
 import {indexDeploymentLogs}  from "./utils.ts"
-import { FormatJsonObjectConfig$outboundSchema } from "@openrouter/sdk/models";
 
 
 const app = express(); 
@@ -189,4 +187,37 @@ catch(error){
     res.status(401).json(`Error from route ${error}`)
 }
 })
+
+// callback url - http://runtime-backend-lb-396229780.ap-southeast-2.elb.amazonaws.com/api/github/callback
+// app.get("/api/github/callback", async(req, res)=>{
+
+//     const code = req.query.code;
+//     const response = await fetch("https://github.com/login/oauth/access_token", {
+//         method: "POST",
+//         {
+//             client_id: process.env.GITHUB_CLIENT_ID,
+//             client_secret: process.env.GITHUB_CLIENT_SECRET,
+//             code
+//         },
+//         {
+//             headers:{
+//                 Accept:"application/json"
+//             }
+//         }
+//     }
+//     );
+
+
+    // const accessToken = response.data.access_token;
+
+
+    // save token in database linked to user
+
+    // res.redirect(
+    //     "http://localhost:3000/projects"
+    // );
+
+// })
+
+// })
 app.listen(8080);

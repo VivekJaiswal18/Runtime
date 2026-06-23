@@ -1,12 +1,18 @@
 import { exec } from "node:child_process"; 
 import { publishBuildLog } from "@repo/kafka";
+import { readdir } from "node:fs/promises";
+import { promisify } from "node:util";
 // const repoDir = "cd home/app/output";
 // const repoDir = "cwd cd home/app/output && npm install && npm run build";
 
 const jobId = process.env.JOB_ID!;
 
 const repo = "cd /home/app/output && npm install && npm run build";
-
+if(!process.env.PRESIGNED_URL){
+    throw new Error("Missing Presigned upload URL!")
+}
+const uploadZip = `cd /home/app/output && zip -r dist.zip dist && curl --upload-file dist.zip ${process.env.PRESIGNED_URL}`
+const execAsync = promisify(exec)
 
 await publishBuildLog({
     jobId: jobId,
@@ -15,7 +21,6 @@ await publishBuildLog({
 })
 const build = exec(repo);
 
-console.log("sandbox running")
 build.stdout?.on('data', async (data)=>{
     try{
     await publishBuildLog({
@@ -42,54 +47,31 @@ build.stderr?.on('data', async (data)=>{
     }
 })
 
-// build.on('close', async (code)=>{
-//     if (code !== 0){
-//     await publishBuildLog({
-//         jobId: jobId,
-//         log: `Error during build with exit code: ${code}`,
-//         type: "error"
-//     })
-//     process.exit(1)
-//     }
-//     await publishBuildLog({
-//         jobId: jobId,
-//         log: "Build Complete",
-//         type: "done"
-//     })
-//     process.exit(0)
-// })
-
 build.on('close', async(code)=>{
-
     try{
-
         if(code !== 0){
-
             await publishBuildLog({
                 jobId,
                 log:`Error during build with exit code: ${code}`,
                 type:"error"
             });
-
             return;
         }
-
 
         await publishBuildLog({
             jobId,
             log:"Build Complete",
             type:"done"
         });
-
-
-    }finally{
-
+        // const localDir = "home/app/output/dist"
+        // await upoadDist(localDir, jobId)
+        await execAsync(uploadZip)
+    }
+    finally{
         setTimeout(()=>{
             process.exit(code ?? 0)
         },1000)
-
     }
-
 });
 
 build.on("error", async(error) =>{
@@ -100,3 +82,12 @@ build.on("error", async(error) =>{
     })
     process.exit(1)
 })
+
+// async function upoadDist(localDir: string, s3prefix: string){
+//     const entries  = await readdir(localDir, {recursive: true, withFileTypes: true})
+//     for (const entry in entries){
+//         if (!entry.isFile()) continue;
+        
+//         const 
+//     }
+// }

@@ -21,6 +21,12 @@ export function SiteHeader({ query = "", onQueryChange }: SiteHeaderProps) {
   //   window.location.href = '/api/auth/github';
   // }
 
+  const githubAuth = () =>{
+    window.location.href =
+    `https://github.com/login/oauth/authorize?client_id=${process.env.GITHUB_CLIENT_ID}&scope=repo`;
+
+  }
+
   return (
     <header className="flex min-h-(--header-height) shrink-0 items-center border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height)">
       <div className="flex w-full flex-wrap items-center gap-2 px-4 py-2 lg:flex-nowrap lg:gap-3 lg:px-6">
@@ -50,7 +56,7 @@ export function SiteHeader({ query = "", onQueryChange }: SiteHeaderProps) {
             {isDark ? <SunIcon className="size-4" /> : <MoonIcon className="size-4" />}
             {isDark ? "Light" : "Dark"}
           </Button>
-          <Button onClick={()=> signIn("github")} variant="outline" size="sm" className="h-9 gap-2">
+          <Button /*onClick={()=> signIn("github")}*/ onClick={githubAuth} variant="outline" size="sm" className="h-9 gap-2">
             <svg
               className="size-4 shrink-0"
               viewBox="0 0 24 24"
