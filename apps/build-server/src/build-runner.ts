@@ -2,6 +2,7 @@ import { exec } from "node:child_process";
 import { publishBuildLog } from "@repo/kafka";
 import { readdir } from "node:fs/promises";
 import { promisify } from "node:util";
+import { reduceEachLeadingCommentRange } from "typescript";
 // const repoDir = "cd home/app/output";
 // const repoDir = "cwd cd home/app/output && npm install && npm run build";
 
@@ -65,7 +66,19 @@ build.on('close', async(code)=>{
         });
         // const localDir = "home/app/output/dist"
         // await upoadDist(localDir, jobId)
+        exec("ls /home/app/output/dist", (err, stdout, stderr)=>{
+            if(err){
+                console.log("Error in runner", err)
+            }
+        console.log(stdout)
+        })
         await execAsync(uploadZip)
+        exec("ls /home/app/output/dist.zip", (err, stdout, stderr)=>{
+            if(err){
+                console.log("Error in runner zip", err)
+            }
+        console.log(stdout)
+        })
     }
     finally{
         setTimeout(()=>{
