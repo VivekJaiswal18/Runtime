@@ -12,7 +12,7 @@ const repo = "cd /home/app/output && npm install && npm run build";
 if(!process.env.PRESIGNED_URL){
     throw new Error("Missing Presigned upload URL!")
 }
-const uploadZip = `cd /home/app/output && zip -r dist.zip dist && curl --upload-file dist.zip ${process.env.PRESIGNED_URL}`
+const uploadZip = `cd /home/app/output && zip -r dist.zip dist && curl --upload-file dist.zip "${process.env.PRESIGNED_URL}"`
 const execAsync = promisify(exec)
 
 await publishBuildLog({
