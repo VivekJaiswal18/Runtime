@@ -62,7 +62,7 @@ startBuildJobConsumer(async(jobId, repoUrl, branch)=>{
 async function getPresignedUrl(jobId: string){
     const command = new PutObjectCommand({
         Bucket: process.env.BUCKET,
-        Key: `${jobId}/dist.zip`,
+        Key: `artifacts/${jobId}/dist.zip`,
         ContentType: 'application/zip'
     })
 

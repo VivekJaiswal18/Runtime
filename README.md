@@ -1,159 +1,106 @@
-# Turborepo starter
+# Runtime
 
-This Turborepo starter is maintained by the Turborepo core team.
+A Vercel-like cloud deployment platform that automatically builds, analyzes, and deploys user applications from GitHub. It uses isolated AWS ECS build environments, Kafka-driven job orchestration, real-time build logs, AI-powered deployment summaries with RAG search, and secure S3-based artifact storage with CDN delivery, enabling developers to deploy projects seamlessly while gaining intelligent insights into every build.
 
-## Using this example
 
-Run the following command:
+## Repository structure
+
+- `apps/web`: frontend application powered by [Next.js](https://nextjs.org/)
+- `apps/backend`: backend application
+- `packages/db`: shared database package using Prisma
+- `packages/kafka`: shared Kafka package
+- `packages/ui`: shared React UI components
+- `packages/eslint-config`: shared ESLint configuration
+- `packages/typescript-config`: shared TypeScript configuration
+
+### Tech Stack
+
+* **Frontend:** Next.js, React, TypeScript, Tailwind CSS
+* **Backend:** Node.js, Express.js, TypeScript
+* **Database:** PostgreSQL, Prisma ORM
+* **Message Queue / Event Streaming:** Apache Kafka (KafkaJS)
+* **AI Layer:** LLM APIs, Embeddings, RAG pipeline
+* **Vector Database:** Qdrant
+* **Cloud Infrastructure:** AWS ECS Fargate (isolated build runners), AWS ECR services
+* **Storage:** AWS S3 (deployment artifacts & build outputs)
+* **CDN / Hosting:** AWS CloudFront, Isolated ECS Task
+* **Containerization:** Docker
+* **CI/CD Workflow:** GitHub repository integration, automated build pipelines
+* **Authentication & Security:** GitHub OAuth, Presigned S3 URLs, IAM roles
+* **Build System:** Custom sandboxed build execution environment
+* **Logging & Monitoring:** Kafka-based real-time build logs, AWS CloudWatch
+* **Package Management:** pnpm monorepo
+* **Deployment Architecture:** Event-driven microservices architecture with ECS task orchestration
+
+
+## Requirements
+
+- Node.js >= 18
+- pnpm
+
+## Setup
+
+Install dependencies from the repository root:
 
 ```sh
-npx create-turbo@latest
+pnpm install
 ```
 
-## What's inside?
-
-This Turborepo includes the following packages/apps:
-
-### Apps and Packages
-
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
-
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
-
-### Utilities
-
-This Turborepo has some additional tools already setup for you:
-
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
-
-### Build
-
-To build all apps and packages, run the following command:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
+If you need to install Turborepo globally, run:
 
 ```sh
-cd my-turborepo
+pnpm add -g turbo
+```
+
+## Root scripts
+
+From the repository root, use these commands:
+
+```sh
+pnpm build
+pnpm dev
+pnpm lint
+pnpm format
+pnpm check-types
+```
+
+These map to the root Turbo commands defined in `package.json`.
+
+## Turbo commands
+
+From the repository root, run the monorepo task pipeline:
+
+With global `turbo`:
+
+```sh
 turbo build
-```
+``` 
 
-Without global `turbo`, use your package manager:
+Without global `turbo`:
 
 ```sh
-cd my-turborepo
-npx turbo build
-pnpm dlx turbo build
 pnpm exec turbo build
 ```
 
-You can build a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
+## Running a specific app
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo build --filter=docs
-```
-
-Without global `turbo`:
+Use Turbo filters to target a specific package.
 
 ```sh
-npx turbo build --filter=docs
-pnpm exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
-```
-
-### Develop
-
-To develop all apps and packages, run the following command:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo dev
-```
-
-Without global `turbo`, use your package manager:
-
-```sh
-cd my-turborepo
-npx turbo dev
-pnpm exec turbo dev
-pnpm exec turbo dev
-```
-
-You can develop a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo dev --filter=web
-```
-
-Without global `turbo`:
-
-```sh
-npx turbo dev --filter=web
 pnpm exec turbo dev --filter=web
-pnpm exec turbo dev --filter=web
+pnpm exec turbo dev --filter=backend
+pnpm exec turbo build --filter=web
+pnpm exec turbo build --filter=backend
 ```
 
-### Remote Caching
+## Package details
 
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
+- `apps/web` depends on `@repo/ui`
+- `apps/backend` depends on `@repo/db` and `@repo/kafka`
+- `packages/db` runs `prisma generate` as part of its build
 
-Turborepo can use a technique known as [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
+## Notes
 
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo login
-```
-
-Without global `turbo`, use your package manager:
-
-```sh
-cd my-turborepo
-npx turbo login
-pnpm exec turbo login
-pnpm exec turbo login
-```
-
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
-
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo link
-```
-
-Without global `turbo`:
-
-```sh
-npx turbo link
-pnpm exec turbo link
-pnpm exec turbo link
-```
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turborepo.dev/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.dev/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.dev/docs/reference/configuration)
-- [CLI Usage](https://turborepo.dev/docs/reference/command-line-reference)
+- `packages/ui` is a private package used by `apps/web`
+- `packages/db` and `packages/kafka` are shared libraries used by the backend
+- `packages/eslint-config` and `packages/typescript-config` provide workspace-wide lint/type settings
