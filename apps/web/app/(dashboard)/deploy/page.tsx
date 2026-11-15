@@ -2,17 +2,16 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardHeader, CardTitle, CardDescription, CardAction, CardContent, CardFooter } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Link } from "lucide-react"
-import { Label } from "radix-ui"
-import React from "react"
-import {useState} from "react"
+import { useSearchParams } from "next/navigation"
+import React, { useState } from "react"
 
 export default function Deploy(){
+    const searchParams = useSearchParams()
 
     const [formData, setformData] = useState({
-        name: "",
-        repoUrl: "",
-        branch: ""
+        name: searchParams.get("name") ?? "",
+        repoUrl: searchParams.get("repoUrl") ?? "",
+        branch: searchParams.get("branch") ?? ""
     })
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) =>{
@@ -29,7 +28,7 @@ export default function Deploy(){
           alert("Missing access token — please login first")
           return
         }
-        const response = await fetch("http://runtime-backend-lb-396229780.ap-southeast-2.elb.amazonaws.com/deploy", {
+        await fetch(`${process.env.BACKEND_LB}/deploy`, {
             method: "POST",
             headers: {
                 "Content-type": "application/json",

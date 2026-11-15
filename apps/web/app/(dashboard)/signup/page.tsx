@@ -32,7 +32,7 @@ export default function SignupCard() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
       try{
-        const response = await fetch("http://runtime-backend-lb-396229780.ap-southeast-2.elb.amazonaws.com/signup", {
+        const response = await fetch(`${NEXT_PUBLIC_BACKEND_LB}/signup`, {
           method: "POST",
           credentials: "include",
           headers: {

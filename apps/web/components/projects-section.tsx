@@ -10,20 +10,23 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { MoreHorizontalIcon } from "lucide-react"
+import { useRouter } from "next/navigation"
 
 type ProjectRow = {
+  id: string
   name: string
   status: "Ready" | "Building" | "Failed"
   url: string
 }
 
 const projects: ProjectRow[] = [
-  { name: "portfolio", status: "Ready", url: "portfolio.runtime.app" },
-  { name: "edu-vault-neo", status: "Building", url: "edu-vault-neo.runtime.app" },
-  { name: "cross-guard", status: "Ready", url: "cross-guard.runtime.app" },
-  { name: "superdev-app", status: "Failed", url: "superdev-app.runtime.app" },
-  { name: "poly-chain", status: "Ready", url: "poly-chain.runtime.app" },
-  { name: "einstein-ai", status: "Ready", url: "einstein-ai.runtime.app" },
+  { id: "B8oFn6e7y", name: "portfolio", status: "Ready", url: "portfolio.runtime.app" },
+  { id: "rntm-dummy", name: "runtime-demo", status: "Ready", url: "runtime-demo.runtime.app" },
+  { id: "edu-vault-neo", name: "edu-vault-neo", status: "Building", url: "edu-vault-neo.runtime.app" },
+  { id: "cross-guard", name: "cross-guard", status: "Ready", url: "cross-guard.runtime.app" },
+  { id: "superdev-app", name: "superdev-app", status: "Failed", url: "superdev-app.runtime.app" },
+  { id: "poly-chain", name: "poly-chain", status: "Ready", url: "poly-chain.runtime.app" },
+  { id: "einstein-ai", name: "einstein-ai", status: "Ready", url: "einstein-ai.runtime.app" },
 ]
 
 function statusTone(status: ProjectRow["status"]) {
@@ -33,6 +36,7 @@ function statusTone(status: ProjectRow["status"]) {
 }
 
 export function ProjectsSection({ query = "" }: { query?: string }) {
+  const router = useRouter()
   const normalized = query.trim().toLowerCase()
   const filtered = projects.filter((project) => {
     if (!normalized) return true
@@ -68,7 +72,11 @@ export function ProjectsSection({ query = "" }: { query?: string }) {
           </TableHeader>
           <TableBody>
             {filtered.map((project) => (
-              <TableRow key={project.name}>
+              <TableRow
+                key={project.id}
+                className="cursor-pointer"
+                onClick={() => router.push(`/deployments/${project.id}`)}
+              >
                 <TableCell className="font-medium">{project.name}</TableCell>
                 <TableCell>
                   <span className={`inline-flex rounded-full border px-2 py-0.5 text-[11px] font-medium ${statusTone(project.status)}`}>
@@ -78,14 +86,16 @@ export function ProjectsSection({ query = "" }: { query?: string }) {
                 <TableCell className="text-muted-foreground">{project.url}</TableCell>
                 <TableCell className="text-right">
                   <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
+                    <DropdownMenuTrigger asChild onClick={(event) => event.stopPropagation()}>
                       <Button variant="ghost" size="icon-sm" aria-label={`More actions for ${project.name}`}>
                         <MoreHorizontalIcon />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem>Open</DropdownMenuItem>
-                      <DropdownMenuItem>View Deployments</DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => router.push(`/deployments/${project.id}`)}>
+                        View Deployments
+                      </DropdownMenuItem>
                       <DropdownMenuItem>Settings</DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>

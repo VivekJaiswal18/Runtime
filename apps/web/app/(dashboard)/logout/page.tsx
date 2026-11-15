@@ -9,7 +9,7 @@ const handleSubmit = async (e: React.FormEvent) =>{
         return
         }
     try{
-        const response = await fetch("http://runtime-backend-lb-396229780.ap-southeast-2.elb.amazonaws.com/logout", {
+        const response = await fetch(`${NEXT_PUBLIC_BACKEND_LB}/logout`, {
         method: "POST",
         credentials: "include",
         headers: {

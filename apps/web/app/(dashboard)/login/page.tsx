@@ -33,7 +33,7 @@ export default function LoginCard() {
 const handleSubmit = async (e: React.FormEvent) =>{
   e.preventDefault()
   try{
-    const response = await fetch("http://runtime-backend-lb-396229780.ap-southeast-2.elb.amazonaws.com/login", {
+    const response = await fetch(`${NEXT_PUBLIC_BACKEND_LB}/login`, {
       method: "POST",
       credentials: "include",
       headers:{
