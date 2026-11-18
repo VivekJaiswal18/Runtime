@@ -40,10 +40,26 @@ model Deployment {
   commitHash    String
   branch        String        
   project       Project       @relation(fields: [projectId], references: [id])
+  fixes         Fix[]
+}
+
+model Fix {
+  id               Int    @id   @default(autoincrement())
+  projectId        Int
+  deploymentId     Int
+  fixSummary       String
+  commitHash       String
+  linesChanged     String
+  fixDiff          String
+  fixCount         Int          @default(0)
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+  deployment       Deployment   @relation(fields: [deploymentId], references: [id])
 }
 
 enum Status{
   queued
   failed
   deployed
+  built
 }
