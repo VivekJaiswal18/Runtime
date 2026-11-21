@@ -21,6 +21,7 @@ model Project {
   id            Int           @id   @default(autoincrement())
   userId        Int
   name          String
+  owner         String        @default("")
   repoUrl       String
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
@@ -52,6 +53,7 @@ model Fix {
   linesChanged     String
   fixDiff          String
   fixCount         Int          @default(0)
+  attemptCount     Int          @default(0)
   createdAt        DateTime     @default(now())
   updatedAt        DateTime     @updatedAt
   deployment       Deployment   @relation(fields: [deploymentId], references: [id])
